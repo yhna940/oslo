@@ -4,19 +4,25 @@ from typing import List, Optional, Tuple
 
 import torch
 
-from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk import (
-    Chunk,
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk.manager import (
     ChunkManager,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk.chunk import (
+    Chunk,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer import (
     MemStats,
 )
 
-from .memory_tracer import ChunkMemStatsCollector
-from .placement_policy import PlacementPolicyFactory
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer import (
+    ChunkMemStatsCollector,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.placement_policy import (
+    PlacementPolicyFactory,
+)
 
 
-class HeterogeneousMemoryManager:
+class HeterogeneousManager:
     """
     Stateful Tensor Manager, inspired from PatrickStar
 
@@ -30,7 +36,7 @@ class HeterogeneousMemoryManager:
             If it's 'auto', they are moving dynamically based on CPU and CUDA memory usage. It will utilize Heterogeneousgeneous memory space evenly and well.
             Note that 'auto' policy can only work well when no other processes use CUDA during your training.
         chunk_manager (ChunkManager): A ``ChunkManager`` instance.
-        memstats (MemStats, optional): a mem stats collected by a runtime mem tracer. if None then HeterogeneousMemoryManager will collect it during a warmup iteration.
+        memstats (MemStats, optional): a mem stats collected by a runtime mem tracer. if None then HeterogeneousManager will collect it during a warmup iteration.
     """
 
     def __init__(
@@ -90,7 +96,7 @@ class HeterogeneousMemoryManager:
         """Memstats
 
         get the memory statistics during training.
-        The stats could be collected by a runtime memory tracer, or collected by the HeterogeneousMemoryManager.
+        The stats could be collected by a runtime memory tracer, or collected by the HeterogeneousManager.
         Note, for the latter, you can not access the memstats before warmup iteration finishes.
         """
         if self._premade_memstats_:

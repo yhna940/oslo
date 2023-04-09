@@ -35,8 +35,15 @@ from oslo.torch.nn.parallel.data_parallel.zero.sharded_optim._utils import (
     sync_param,
 )
 
-from ._base_optim import BaseOptimizerWrapper
-from .bookkeeping import BucketStore, GradientStore, ParameterStore, TensorBucket
+from oslo.torch.nn.parallel.data_parallel.zero.sharded_optim._base_optim import (
+    BaseOptimizerWrapper,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.sharded_optim.bookkeeping import (
+    BucketStore,
+    GradientStore,
+    ParameterStore,
+    TensorBucket,
+)
 
 
 class ZeroRedundancyOptimizer(BaseOptimizerWrapper):

@@ -3,11 +3,15 @@ from typing import Deque, Dict, Iterable, List, Optional, Set, Tuple
 
 import torch
 
-from .chunk import Chunk, ChunkFullError, TensorState
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk.chunk import (
+    Chunk,
+    ChunkFullError,
+    TensorState,
+)
 from oslo.torch.nn.parallel.data_parallel.zero.tensor import (
     DistributedTensor,
 )
-from oslo.torch.nn.parallel.data_parallel.zero.utils import get_current_device
+from oslo.torch.nn.parallel.data_parallel.zero.utils.commons import get_current_device
 
 
 class ChunkManager:

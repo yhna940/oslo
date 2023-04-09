@@ -7,7 +7,7 @@ from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk impor
     init_chunk_manager,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.manager import (
-    HeterogeneousMemoryManager,
+    HeterogeneousManager,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer import (
     MemStats,
@@ -34,7 +34,7 @@ class _HeterogeneousDataParallel(_FullyShardedDataParallel):
         memstats: Optional[MemStats] = None,
     ) -> None:
         """
-        A torch.nn.Module wrapper using ZeRO-DP and HeterogeneousMemoryManager.
+        A torch.nn.Module wrapper using ZeRO-DP and HeterogeneousManager.
         WARNING: The class will modify the module inline!
         Example:
             model is initialized under the context of oslo.ready
@@ -70,9 +70,10 @@ class _HeterogeneousDataParallel(_FullyShardedDataParallel):
             min_chunk_size_mb=min_chunk_size_mb,
             strict_ddp_flag=strict_ddp_mode,
         )
-        heterogeneous_manager = HeterogeneousMemoryManager(
+        heterogeneous_manager = HeterogeneousManager(
             placement_policy, chunk_manager, memstats
         )
+
         super().__init__(
             module,
             heterogeneous_manager,

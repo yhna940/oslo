@@ -4,7 +4,9 @@ import torch
 import torch.distributed as dist
 from numpy import prod
 
-from .distributed_spec import DistributedSpec
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_spec import (
+    DistributedSpec,
+)
 
 from oslo.torch.distributed.parallel_mode import ParallelMode
 from oslo.torch.distributed.parallel_context import ParallelContext

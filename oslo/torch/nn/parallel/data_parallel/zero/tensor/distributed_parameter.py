@@ -2,10 +2,16 @@ from typing import Optional
 
 import torch
 
-from .distributed_tensor import DistributedTensor
-from .const import TensorType
-from .param_op_hook import DistributedParamOpHookManager
-from .distributed_tensor_spec import DistributedTensorSpec
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_tensor import (
+    DistributedTensor,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.const import TensorType
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.param_op_hook import (
+    DistributedParamOpHookManager,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_tensor_spec import (
+    DistributedTensorSpec,
+)
 
 
 def filter_distributed_parameters(*args, **kwargs):

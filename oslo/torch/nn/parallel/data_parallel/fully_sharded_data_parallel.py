@@ -21,7 +21,7 @@ from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk impor
     TensorState,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.manager import (
-    HeterogeneousMemoryManager,
+    HeterogeneousManager,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer.param_runtime_order import (
     OrderedParamGenerator,
@@ -65,13 +65,13 @@ def _cast_float(args, dtype: torch.dtype):
 class _FullyShardedDataParallel(_DistributedDataParallel):
     """Fully sharded data parallel for DistributedTensor.
     Warning: Nested ZeroDDP is not supported now.
-    It is designed to be used with ChunkManager and HeterogeneousMemoryManager.
-    For more details, see the API reference of ``ChunkManager`` and ``HeterogeneousMemoryManager``.
+    It is designed to be used with ChunkManager and HeterogeneousManager.
+    For more details, see the API reference of ``ChunkManager`` and ``HeterogeneousManager``.
 
     Args:
         module (torch.nn.Module): Module to apply ZeRO-DP.
-        heterogeneous_manager (HeterogeneousMemoryManager): Manages the chunk manager and heterogeneous memory space.
-            For more details, see the API reference of ``HeterogeneousMemoryManager``.
+        heterogeneous_manager (HeterogeneousManager): Manages the chunk manager and heterogeneous memory space.
+            For more details, see the API reference of ``HeterogeneousManager``.
         parallel_context (ParallelContext): process group object.
         pin_memory (bool): Chunks on CPU Memory use pin-memory.
         force_outputs_fp32 (bool): If set to True, outputs will be fp32. Otherwise, outputs will be fp16.
@@ -83,7 +83,7 @@ class _FullyShardedDataParallel(_DistributedDataParallel):
     def __init__(
         self,
         module: torch.nn.Module,
-        heterogeneous_manager: HeterogeneousMemoryManager,
+        heterogeneous_manager: HeterogeneousManager,
         parallel_context: ParallelContext = None,
         pin_memory: bool = False,
         force_outputs_fp32: bool = False,
@@ -590,7 +590,6 @@ class _FullyShardedDataParallel(_DistributedDataParallel):
     def _init_chunks(
         self, param_order, strict_ddp_mode: bool, cpu_offload: bool, pin_memory: bool
     ):
-        ddp_pg = self.parallel_context.get_group(ParallelMode.DATA)
         for p in param_order.generate():
             assert isinstance(p, DistributedParameter)
 
@@ -598,7 +597,7 @@ class _FullyShardedDataParallel(_DistributedDataParallel):
             if strict_ddp_mode:
                 if not p.is_replicate():
                     p.set_dist_spec(ReplicaSpec())
-                p.set_process_group(pg=ddp_pg)
+                p.set_parallel_context(self.parallel_context)
 
             # ignore the parameters with no gradient
             if not p.requires_grad:
@@ -612,13 +611,13 @@ class _FullyShardedDataParallel(_DistributedDataParallel):
             # create a fp32 parameter
             fp32_data = p.data.float()
             fp32_p = DistributedTensor(
-                fp32_data, spec=DistributedTensorSpec(p.process_group)
+                fp32_data, spec=DistributedTensorSpec(p.parallel_context)
             )
             # create a fp16 parameter
             p.data = p.data.half()
 
             # register the fp16 parameter and fp32 parameter in the chunk manager
-            dp_world_size = p.process_group.dp_world_size()
+            dp_world_size = p.parallel_context.get_world_size(ParallelMode.DATA)
             self.chunk_manager.register_tensor(
                 tensor=p,
                 group_type="fp16_param",

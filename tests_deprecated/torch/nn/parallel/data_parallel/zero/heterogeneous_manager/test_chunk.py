@@ -13,7 +13,7 @@ from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk impor
 from oslo.torch.nn.parallel.data_parallel.zero.tensor import DistributedParameter
 from oslo.torch.distributed.parallel_context import ParallelContext
 from oslo.torch.utils import get_free_port
-from oslo.torch.nn.parallel.data_parallel.zero.utils import get_current_device
+from oslo.torch.nn.parallel.data_parallel.zero.utils.commons import get_current_device
 
 import itertools
 

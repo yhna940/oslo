@@ -5,15 +5,23 @@ from typing import Callable, Optional, Set
 
 import torch
 
-from .distributed_spec_manager import DistributedSpecManager
-from .distributed_spec import DistributedSpec, DistributedPlacementPattern, ReplicaSpec
-from .distributed_tensor_spec import DistributedTensorSpec
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_spec_manager import (
+    DistributedSpecManager,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_spec import (
+    DistributedSpec,
+    DistributedPlacementPattern,
+    ReplicaSpec,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_tensor_spec import (
+    DistributedTensorSpec,
+)
 
 from oslo.torch.distributed.parallel_mode import ParallelMode
 from oslo.torch.distributed.parallel_context import ParallelContext
 
-from .const import TensorType
-from .op_wrapper import _SHARDED_OPS
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.const import TensorType
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.op_wrapper import _SHARDED_OPS
 
 
 @lru_cache(None)

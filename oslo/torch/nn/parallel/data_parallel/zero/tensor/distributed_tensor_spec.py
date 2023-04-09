@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from .distributed_spec import DistributedSpec, DistributedPlacementPattern
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_spec import (
+    DistributedSpec,
+    DistributedPlacementPattern,
+)
 from oslo.torch.distributed.parallel_context import ParallelContext
 
-from .compute_spec import ComputeSpec
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.compute_spec import ComputeSpec
 
 
 @dataclass

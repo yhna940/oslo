@@ -1,16 +1,21 @@
 import time
 from typing import Optional, List
 
-from .memory_monitor import SyncCudaMemoryMonitor
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer.memory_monitor import (
+    SyncCudaMemoryMonitor,
+)
 
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk import (
     ChunkManager,
 )
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer.memory_stats import (
+    MemStats,
+)
 
-from .memory_stats import MemStats
-
-from oslo.torch.nn.parallel.data_parallel.zero.utils import get_current_device
-from .utils import get_device_memory_capacity
+from oslo.torch.nn.parallel.data_parallel.zero.utils.commons import get_current_device
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer.utils import (
+    get_device_memory_capacity,
+)
 
 
 class ChunkMemStatsCollector:

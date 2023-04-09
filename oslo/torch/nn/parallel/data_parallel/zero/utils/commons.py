@@ -1,7 +1,13 @@
 import torch
 import torch.distributed as dist
 
-from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk import Chunk
+from typing import Callable, TYPE_CHECKING
+import functools
+
+if TYPE_CHECKING:
+    from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk import (
+        Chunk,
+    )
 
 
 def get_current_device() -> torch.device:
@@ -15,7 +21,7 @@ def get_current_device() -> torch.device:
         return torch.device("cpu")
 
 
-def get_temp_total_chunk_on_cuda(chunk: Chunk):
+def get_temp_total_chunk_on_cuda(chunk: "Chunk"):
     if chunk.is_gathered:
         return chunk.cuda_global_chunk
 
@@ -31,3 +37,16 @@ def get_temp_total_chunk_on_cuda(chunk: Chunk):
     dist.all_gather(tensor_list=gather_list, tensor=shard_temp, group=chunk.torch_pg)
 
     return total_temp
+
+
+def disposable(func: Callable) -> Callable:
+    executed = False
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        nonlocal executed
+        if not executed:
+            executed = True
+            return func(*args, **kwargs)
+
+    return wrapper

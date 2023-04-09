@@ -5,11 +5,11 @@ from typing import List
 
 import torch
 
-from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk import (
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.chunk.chunk import (
     TensorState,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.manager import (
-    HeterogeneousMemoryManager,
+    HeterogeneousManager,
 )
 from oslo.torch.nn.parallel.data_parallel.zero.tensor.param_op_hook import (
     DistributedParamOpHook,
@@ -23,7 +23,7 @@ class TrainingPhase(Enum):
 
 
 class HeterogeneousZeROHook(DistributedParamOpHook):
-    def __init__(self, heterogeneous_manager: HeterogeneousMemoryManager) -> None:
+    def __init__(self, heterogeneous_manager: HeterogeneousManager) -> None:
         super().__init__()
         self._heterogeneous_manager = heterogeneous_manager
         self._chunk_manager = heterogeneous_manager.chunk_manager

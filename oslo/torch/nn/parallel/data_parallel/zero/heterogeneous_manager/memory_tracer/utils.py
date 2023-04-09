@@ -6,7 +6,7 @@ from collections import namedtuple
 
 from typing import Dict
 
-from oslo.torch.nn.parallel.data_parallel.zero.utils import get_current_device
+from oslo.torch.nn.parallel.data_parallel.zero.utils.commons import get_current_device
 from oslo.torch.distributed.parallel_context import ParallelContext
 from oslo.torch.distributed.parallel_mode import ParallelMode
 

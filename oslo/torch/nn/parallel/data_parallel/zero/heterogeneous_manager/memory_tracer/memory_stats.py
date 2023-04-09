@@ -2,7 +2,9 @@ from typing import List, Optional
 
 import torch
 
-from .param_runtime_order import OrderedParamGenerator
+from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer.param_runtime_order import (
+    OrderedParamGenerator,
+)
 
 
 class MemStats(object):

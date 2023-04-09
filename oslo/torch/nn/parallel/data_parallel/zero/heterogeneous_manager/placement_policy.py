@@ -15,7 +15,7 @@ from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_trac
 from oslo.torch.nn.parallel.data_parallel.zero.heterogeneous_manager.memory_tracer import (
     ChunkMemStatsCollector,
 )
-from oslo.torch.nn.parallel.data_parallel.zero.utils import get_current_device
+from oslo.torch.nn.parallel.data_parallel.zero.utils.commons import get_current_device
 
 
 class PlacementPolicy(ABC):

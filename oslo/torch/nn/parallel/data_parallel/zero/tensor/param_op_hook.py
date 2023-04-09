@@ -4,8 +4,12 @@ from typing import Any, List, Tuple
 
 import torch
 
-from .distributed_tensor import DistributedTensor
-from .distributed_tensor_spec import DistributedTensorSpec
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_tensor import (
+    DistributedTensor,
+)
+from oslo.torch.nn.parallel.data_parallel.zero.tensor.distributed_tensor_spec import (
+    DistributedTensorSpec,
+)
 
 
 class DistributedParamOpHook(ABC):
