@@ -18,13 +18,6 @@ from oslo.torch.nn.parallel.data_parallel._utils import (
     is_ddp_ignored,
     DistributedBackwardFunction,
 )
-from typing import Optional, Union, Tuple, TYPE_CHECKING
-import warnings
-
-if TYPE_CHECKING:
-    from oslo.torch.nn.parallel.data_parallel.zero.sharded_optim._base_optim import (
-        BaseOptimizerWrapper,
-    )
 
 
 def DistributedDataParallel(
@@ -32,99 +25,21 @@ def DistributedDataParallel(
     parallel_context: ParallelContext,
     bucket_cap_mb: int = 25,
     rebuild_bucket: bool = True,
-    optimizer: Optional[torch.optim.Optimizer] = None,
-    redundancy_stage: Optional[int] = None,
-    **kwargs
-) -> Union[OsloParallelWrapper, Tuple[OsloParallelWrapper, "BaseOptimizerWrapper"]]:
-    """Creates a distributed data parallel wrapper for the given module.
+):
+    ddp = _DistributedDataParallel(
+        module=module,
+        parallel_context=parallel_context,
+        bucket_cap_mb=bucket_cap_mb,
+        rebuild_bucket=rebuild_bucket,
+    )
 
-    This function is used to parallelize a given module across multiple devices for
-    distributed training. It supports various redundancy stages (0, 1, 2, 3) for
-    different levels of optimization.
-
-    Args:
-        module: The module to be parallelized.
-        parallel_context: The parallel context.
-        bucket_cap_mb: The bucket size in MB.
-        rebuild_bucket: Whether to rebuild the bucket.
-        optimizer: The optimizer to be used.
-        redundancy_stage: The redundancy stage.
-
-    Returns:
-        Union[OsloParallelWrapper, Tuple[OsloParallelWrapper, "_BaseOptimizer"]]: The wrapped module,
-        and optionally the wrapped optimizer depending on the redundancy stage.
-    """
-    if redundancy_stage is None and optimizer is None:
-        warnings.warn(
-            "The old version of DistributedDataParallel is deprecated and will be removed in a future version. "
-            "Please update your code to use the new version with the 'optimizer' and 'redundancy_stage' arguments.",
-            DeprecationWarning,
-        )
-        ddp = _DistributedDataParallel(
-            module=module,
-            parallel_context=parallel_context,
-            bucket_cap_mb=bucket_cap_mb,
-            rebuild_bucket=rebuild_bucket,
-        )
-        add_wrapper(
-            module,
-            mode=ParallelMode.DATA,
-            wrapper=ddp,
-            parallel_context=parallel_context,
-        )
-        return module
-    else:
-        assert redundancy_stage in [0, 1, 2, 3]
-        if redundancy_stage == 0:
-            wrapped_model = _DistributedDataParallel(
-                module=module,
-                parallel_context=parallel_context,
-            )
-        elif redundancy_stage in [1, 2]:
-            from oslo.torch.nn.parallel.data_parallel.zero.sharded_optim import (
-                ZeroRedundancyOptimizer,
-            )
-
-            wrapped_model = module
-            optimizer = ZeroRedundancyOptimizer(
-                optimizer,
-                parallel_context,
-                partition_grad=False if redundancy_stage == 1 else True,
-            )
-        else:
-            from oslo.torch.nn.parallel.data_parallel.zero.utils.replace_parameters import (
-                replace_params_with_distributed,
-            )
-            from oslo.torch.nn.parallel.data_parallel.heterogeneous_data_parallel import (
-                _HeterogeneousDataParallel,
-            )
-            from oslo.torch.nn.parallel.data_parallel.zero.utils import (
-                get_current_device,
-            )
-            from oslo.torch.nn.parallel.data_parallel.zero.sharded_optim import (
-                HeterogeneousZeROOptimizer,
-            )
-
-            device = get_current_device()
-            replace_params_with_distributed(
-                module, device, parallel_context=parallel_context
-            )
-            wrapped_model = _HeterogeneousDataParallel(
-                module=module,
-                device=device,
-                parallel_context=parallel_context,
-            )
-            optimizer = HeterogeneousZeROOptimizer(
-                optimizer,
-                module=wrapped_model,
-            )
-        add_wrapper(
-            module,
-            mode=ParallelMode.DATA,
-            wrapper=wrapped_model,
-            parallel_context=parallel_context,
-        )
-        return wrapped_model, optimizer
+    add_wrapper(
+        module,
+        mode=ParallelMode.DATA,
+        wrapper=ddp,
+        parallel_context=parallel_context,
+    )
+    return module
 
 
 class _DistributedDataParallel(OsloParallelWrapper):

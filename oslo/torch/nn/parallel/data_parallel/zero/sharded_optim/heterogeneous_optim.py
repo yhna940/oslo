@@ -58,7 +58,7 @@ class HeterogeneousZeROOptimizer(BaseOptimizerWrapper):
         clipping_norm: float = 0.0,
         norm_type: float = 2.0,
         num_fp32_shards_per_param: int = 0,
-        **defaults: Any,
+        **kwargs,
     ):
         super().__init__(optim)
         assert isinstance(module, _FullyShardedDataParallel)
