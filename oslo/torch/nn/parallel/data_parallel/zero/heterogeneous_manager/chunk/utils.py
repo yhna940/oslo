@@ -110,7 +110,7 @@ def classify_params_by_dp_degree(
     for param in param_order.generate():
         assert isinstance(
             param, DistributedParameter
-        ), "please init model in the ColoInitContext"
+        ), "please replace model param with DistributedParameter"
         if is_ddp_ignored(param):
             continue
 
