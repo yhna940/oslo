@@ -114,12 +114,9 @@ class _DistributedDataParallel(OsloParallelWrapper):
                 }
             )
 
-        single_output = isinstance(inputs, torch.Tensor)
-        if single_output:
+        if isinstance(inputs, torch.Tensor):
             inputs = (inputs,)
-
-        outputs = _DistributedBackwardFunction.apply(self, *inputs)
-        return outputs[0] if single_output else outputs
+        return _DistributedBackwardFunction.apply(self, *inputs)
 
     def _pre_backward(self):
         pass
