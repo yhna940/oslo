@@ -21,7 +21,7 @@ class _DistributedBackwardFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, module, *inputs):
         ctx.module = module
-        return inputs
+        return inputs[0] if len(inputs) == 1 else inputs
 
     @staticmethod
     def backward(ctx, *grad_outputs):
