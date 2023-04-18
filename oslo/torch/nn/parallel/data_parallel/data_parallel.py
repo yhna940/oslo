@@ -13,11 +13,22 @@ from oslo.torch.nn.parallel.utils import (
     OsloParallelWrapper,
 )
 from oslo.torch.nn.parallel.data_parallel._reducer import Reducer
-from oslo.torch.nn.parallel.data_parallel._utils import (
-    free_storage,
-    is_ddp_ignored,
-    DistributedBackwardFunction,
-)
+from oslo.torch.nn.parallel.data_parallel._utils import is_ddp_ignored
+
+
+class _DistributedBackwardFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, module, *inputs):
+        ctx.module = module
+        return inputs
+
+    @staticmethod
+    def backward(ctx, *grad_outputs):
+        ctx.module._pre_backward()
+        # Enqueue a callback to flush the reducer.
+        # This callback is triggered after all gradients' calculation is completed.
+        Variable._execution_engine.queue_callback(ctx.module._post_backward)
+        return (None,) + grad_outputs
 
 
 def DistributedDataParallel(
@@ -43,7 +54,7 @@ def DistributedDataParallel(
 
 
 class _DistributedDataParallel(OsloParallelWrapper):
-    """Distributed data parallel wrapper for Oslo.
+    """Distributed data parallel wrapper for OSLO.
     Example:
         >>> from oslo.torch.nn.parallel import DistributedDataParallel as DDP
         >>> model = torch.nn.Linear(20, 1)
@@ -96,8 +107,8 @@ class _DistributedDataParallel(OsloParallelWrapper):
                 {
                     k: v
                     for k, v in zip(
-                        outputs.keys(),
-                        DistributedBackwardFunction.apply(self, *outputs.values()),
+                        inputs.keys(),
+                        _DistributedBackwardFunction.apply(self, *inputs.values()),
                     )
                 }
             )
@@ -121,13 +132,11 @@ class _DistributedDataParallel(OsloParallelWrapper):
         for p in self.module.parameters():
             if is_ddp_ignored(p):
                 continue
-            if p.grad.device.type != "cpu":
-                p.grad = p._saved_grad
+            p.grad = p._saved_grad
 
     def grad_handle(self, p, grad):
         if grad.device.type != "cpu":
             empty_grad = torch.empty_like(grad)
-            free_storage(empty_grad)
             if self.dp_world_size > 1:
                 grad = grad / self.dp_world_size
                 self.comm_stream.wait_stream(torch.cuda.current_stream())
@@ -144,7 +153,7 @@ class _DistributedDataParallel(OsloParallelWrapper):
             return empty_grad
 
         else:
-            # You must model.to('cpu') after oslo.ready() to use cpu.
+            # You must assign the model to CPU after invoking ``oslo.ready()``.
             dist.all_reduce(
                 grad, group=self.parallel_context.get_cpu_group(ParallelMode.DATA)
             )
